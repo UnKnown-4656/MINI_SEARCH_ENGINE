@@ -18,30 +18,39 @@ string ToLower(string str)
 }
 void ScanFiles(fs::path Path, unordered_multimap<string, string> &files)
 {
-    for (const auto &entry : fs::directory_iterator(Path))
+    try
     {
-        if (entry.is_directory())
+        for (const auto &entry : fs::directory_iterator(Path))
         {
-            ScanFiles(entry.path(), files);
-        }
-        if (entry.is_regular_file())
-        {
+            if (entry.is_directory())
+            {
+                ScanFiles(entry.path(), files);
+            }
+            if (entry.is_regular_file())
+            {
             // cout <<entry.path()<<endl;
-            files.insert({entry.path().filename().string(), entry.path().string()});
+                files.insert({ToLower(entry.path().filename().string()), entry.path().string()});
+            }
         }
     }
+    catch (exception &e)
+    {
+        cout << "Error : " << e.what() << endl;
+        return;
+    }
+
 }
 void SerchFunction(unordered_multimap<string, string> &files, string Target)
 {
     bool found = false;
     string LowerTarget = ToLower(Target);
-    string file_type = fs::path(Target).extension().string();
+    string file_type = fs::path(LowerTarget).extension().string();
 
     try
     {
         for (const auto &entry : files)
         {
-            if (ToLower(entry.first).find(LowerTarget) != string::npos)
+            if (entry.first.find(LowerTarget) != string::npos)
             {
                 size_t ending = Target.find_last_of(".");
                 if (ending != string::npos)
@@ -76,7 +85,8 @@ string input(string placeholder)
 {
     string str;
     cout << placeholder;
-    cin >> str;
+    cin.ignore();
+    getline(cin, str); //will read the whole line even if it contains spaces
     return str;
 }
 

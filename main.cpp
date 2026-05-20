@@ -30,14 +30,15 @@ int main()
         cout << "Enter your choice: ";
         cin>> user_choice;
         if(user_choice==2){
+            files.clear();
             ScanFiles(MyPath,files);
             SaveIndex(files,"index.txt");
             cout << "Files Rescanned Successfully" << endl;
             continue;
         }
         else if(user_choice==3){
-            break;
             running=false;
+            break; 
         }
         else if(user_choice==1){
             string Target=input("Enter Target File Name :");
@@ -45,7 +46,7 @@ int main()
         }
         else{
             cout << "Invalid Choice" << endl;
-            break;
+            //break;
         }
     }
 
