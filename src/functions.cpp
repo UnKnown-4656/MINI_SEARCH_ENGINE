@@ -1,4 +1,4 @@
-#include "includes/header.h"
+#include "header.h"
 #include <iostream>
 // using namespace std;
 // namespace fs=filesystem;
@@ -8,6 +8,27 @@
 //  cout << n <<endl;
 //  count_down(n-1);
 //}
+
+vector<string> Tokenize(string &str){
+    vector<string> tokens;
+    string current;
+    for (char c :str){
+        c=tolower(c);
+        if(c=='_' || c=='.' || c=='-' || c==' '){
+            if(!current.empty()){
+                tokens.push_back(current);
+                current.clear();
+            }
+        }
+        else{
+            current+=c;
+        }
+    }
+    if(!current.empty()){
+        tokens.push_back(current);
+    }
+    return tokens;
+}
 string ToLower(string str)
 {
     for (int i = 0; i < str.length(); i++)
@@ -28,8 +49,15 @@ void ScanFiles(fs::path Path, unordered_multimap<string, string> &files)
             }
             if (entry.is_regular_file())
             {
+                string filename = entry.path().filename().string();
+                //string LowerFilename = ToLower(filename);
+                string path = entry.path().string();
+                vector<string> tokenized_filename = Tokenize(filename);
             // cout <<entry.path()<<endl;
-                files.insert({ToLower(entry.path().filename().string()), entry.path().string()});
+                for(const auto &token : tokenized_filename){
+                    files.insert({token, path});
+                }
+                //files.insert({ToLower(entry.path().filename().string()), entry.path().string()});
             }
         }
     }
@@ -43,43 +71,36 @@ void ScanFiles(fs::path Path, unordered_multimap<string, string> &files)
 void SerchFunction(unordered_multimap<string, string> &files, string Target)
 {
     bool found = false;
-    string LowerTarget = ToLower(Target);
-    string file_type = fs::path(LowerTarget).extension().string();
+    //string LowerTarget = ToLower(Target);
+    //string file_type = fs::path(LowerTarget).extension().string();
+    vector <string> tokenized_target = Tokenize(Target);
 
     try
     {
-        for (const auto &entry : files)
+        for (const auto &token : tokenized_target)
         {
-            if (entry.first.find(LowerTarget) != string::npos)
+            auto range = files.equal_range(token);
+            for (auto it = range.first; it != range.second; ++it)
             {
-                size_t ending = Target.find_last_of(".");
-                if (ending != string::npos)
-                {
-                    if (fs::path(entry.first).extension().string() == file_type)
-                    {
-                        cout << entry.first << " : " << entry.second << endl;
-                        found = true;
-                    }
-                }
-                
-                    else{
-                        cout << entry.first << " : " << entry.second << endl;
-                        found = true;
-                    }
+                string file_path = it->second;
+                string filename = fs::path(file_path).filename().string();
+                cout << filename << " : " << file_path << endl;
+                found = true;
             }
- 
         }
-        if (!found)
-            {
-                cout << "File Not Found" << endl;
-                
-            }
+        if (!found){
+        {
+            cout << "File Not Found" << endl;
+        }
+        }
     }
+
     catch (exception &e)
     {
         cout << "Error : " << e.what() << endl;
+        return;
     }
-}
+}       
 
 string input(string placeholder)
 {
@@ -140,23 +161,3 @@ void LoadIndex(unordered_multimap<string, string> &files, string filename)
 }
 
 
-vector<string> Tokenize(string &str){
-    vector<string> tokens;
-    string current;
-    for (char c :str){
-        c=tolower(c);
-        if(c=='_' || c=='.' || c=='-' || c==' '){
-            if(!current.empty()){
-                tokens.push_back(current);
-                current.clear();
-            }
-        }
-        else{
-            current+=c;
-        }
-    }
-    if(!current.empty()){
-        tokens.push_back(current);
-    }
-    return tokens;
-}

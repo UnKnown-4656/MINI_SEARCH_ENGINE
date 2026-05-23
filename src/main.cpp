@@ -1,4 +1,4 @@
-#include "includes/header.h"
+#include "header.h"
 
 //using namespace std;
 //namespace fs=filesystem;
@@ -14,12 +14,12 @@ int main()
     //}
     //ScanFiles(MyPath,files);
     //SerchFunction(files,Target);
-    if(fs::exists("index.txt")){
-        LoadIndex(files,"index.txt");
+    if(fs::exists("data/index.txt")){
+        LoadIndex(files,"data/index.txt");
     }
     else{
         ScanFiles(MyPath,files);
-        SaveIndex(files,"index.txt");
+        SaveIndex(files,"data/index.txt");
     }
     bool running = true;
     while(running==true){
@@ -32,7 +32,7 @@ int main()
         if(user_choice==2){
             files.clear();
             ScanFiles(MyPath,files);
-            SaveIndex(files,"index.txt");
+            SaveIndex(files,"data/index.txt");
             cout << "Files Rescanned Successfully" << endl;
             continue;
         }
@@ -46,7 +46,7 @@ int main()
         }
         else{
             cout << "Invalid Choice" << endl;
-            //break;
+            break;
         }
     }
 
