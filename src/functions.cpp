@@ -37,7 +37,7 @@ string ToLower(string str)
     }
     return str;
 }
-void ScanFiles(fs::path Path, unordered_multimap<string, string> &files)
+void ScanFiles(fs::path Path, unordered_map<string, unordered_set<string>> &files)
 {
     try
     {
@@ -55,7 +55,7 @@ void ScanFiles(fs::path Path, unordered_multimap<string, string> &files)
                 vector<string> tokenized_filename = Tokenize(filename);
             // cout <<entry.path()<<endl;
                 for(const auto &token : tokenized_filename){
-                    files.insert({token, path});
+                    files[token].insert(path);
                 }
                 //files.insert({ToLower(entry.path().filename().string()), entry.path().string()});
             }
@@ -68,7 +68,7 @@ void ScanFiles(fs::path Path, unordered_multimap<string, string> &files)
     }
 
 }
-void SerchFunction(unordered_multimap<string, string> &files, string Target)
+void SerchFunction(unordered_map<string, unordered_set<string>> &files, string Target)
 {
     bool found = false;
     //string LowerTarget = ToLower(Target);
@@ -79,14 +79,21 @@ void SerchFunction(unordered_multimap<string, string> &files, string Target)
     {
         for (const auto &token : tokenized_target)
         {
-            auto range = files.equal_range(token);
-            for (auto it = range.first; it != range.second; ++it)
-            {
-                string file_path = it->second;
-                string filename = fs::path(file_path).filename().string();
-                cout << filename << " : " << file_path << endl;
-                found = true;
+            //auto range = files.equal_range(token);
+            auto it = files.find(token);
+            if(it!=files.end()){
+                for(const auto &path : it->second){
+                    cout << path << endl;
+                    found = true;
+                }
             }
+            //for (auto it = range.first; it != range.second; ++it)
+            //{
+             //   string file_path = it->second;
+             //   string filename = fs::path(file_path).filename().string();
+              //  cout << filename << " : " << file_path << endl;
+              //  found = true;
+            //}
         }
         if (!found){
         {
@@ -106,12 +113,12 @@ string input(string placeholder)
 {
     string str;
     cout << placeholder;
-    cin.ignore();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear the input buffer
     getline(cin, str); //will read the whole line even if it contains spaces
     return str;
 }
 
-void SaveIndex(unordered_multimap<string, string> &files, string filename)
+void SaveIndex(unordered_map<string, unordered_set<string>> &files, string filename)
 {
     ofstream Index(filename);
     if (!Index.is_open())
@@ -122,14 +129,17 @@ void SaveIndex(unordered_multimap<string, string> &files, string filename)
     else{
         for (const auto &entry : files)
         {
-            Index << entry.first << "|" << entry.second << endl;
+            //Index << entry.first << "|" << entry.second << endl;
+            for(const auto &path : entry.second){
+                Index << entry.first << "|" << path << endl;
+            }
         }
         cout << "Index Saved Successfully" << endl;
     }
     
 }
 
-void LoadIndex(unordered_multimap<string, string> &files, string filename)
+void LoadIndex(unordered_map<string, unordered_set<string>> &files, string filename)
 
 {
     ifstream Index(filename);
@@ -148,11 +158,11 @@ void LoadIndex(unordered_multimap<string, string> &files, string filename)
             if (delimiter != string::npos)
             {
                 string key = line.substr(0, delimiter);
-                vector<string> tokenized_key = Tokenize(key);
+                //vector<string> tokenized_key = Tokenize(key);
                 string value = line.substr(delimiter + 1);
-                for(const auto &token : tokenized_key){
-                    files.insert({token, value});
-                }
+                //for(const auto &token : tokenized_key){
+                files[key].insert(value);
+                //}
                 //files.insert({key, value});
             }
         }
